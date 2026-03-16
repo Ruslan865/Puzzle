@@ -6,7 +6,15 @@
 <title>KidsPaint Puzzle</title>
 <style>
 body { font-family:sans-serif; text-align:center; background:#f0f0f0; margin:0; padding:0; }
-#puzzleContainer { position:relative; display:inline-block; margin-top:20px; border:2px solid #333; touch-action: none; }
+#puzzleContainer {
+  position:relative;
+  display:inline-block;
+  margin-top:20px;
+  border:2px solid #333;
+  width:400px;   /* Sabit çərçivə ölçüsü */
+  height:400px;
+  overflow:hidden; /* Parçalar container-dan çıxmasın */
+}
 .piece { position:absolute; cursor:grab; border:1px solid #ccc; touch-action:none; }
 #controls{ margin-top:20px; }
 </style>
@@ -18,9 +26,11 @@ crossorigin="anonymous"></script>
 <body>
 
 <h1>KidsPaint Puzzle</h1>
-<p>Klikləyin və şəkil parçalanacaq, sonra yığmağa başlayın!</p>
+<p>İlk baxışda şəkli görün. “Dağıt / Puzzle Başlat” düyməsinə basanda parçalanır.</p>
 
-<div id="puzzleContainer"></div>
+<div id="puzzleContainer">
+  <img id="fullImage" src="whale1.jpg" style="width:100%; height:100%; object-fit:contain;">
+</div>
 
 <div id="controls">
   <button id="startBtn">Dağıt / Puzzle Başlat</button>
@@ -46,31 +56,27 @@ crossorigin="anonymous"></script>
 </div>
 
 <script>
-// Puzzle parametrləri
-const imageSrc = "whale1.jpg"; // Rəngli şəkil
+const imageSrc = "whale1.jpg";
 const rows = 3, cols = 3;
 const container = document.getElementById("puzzleContainer");
 const startBtn = document.getElementById("startBtn");
 const pieces = [];
-
 let draggingPiece = null;
 let offsetX = 0, offsetY = 0;
 
-// Puzzle yarat
+// Puzzle yaratma funksiyası
 function createPuzzle() {
+    const fullImage = document.getElementById("fullImage");
+    fullImage.style.display = "none"; // İlk şəkil gizlənir
+
     container.innerHTML = '';
     pieces.length = 0;
 
     const img = new Image();
     img.src = imageSrc;
     img.onload = () => {
-        const imgWidth = img.naturalWidth;
-        const imgHeight = img.naturalHeight;
-        container.style.width = imgWidth + "px";
-        container.style.height = imgHeight + "px";
-
-        const pieceWidth = imgWidth / cols;
-        const pieceHeight = imgHeight / rows;
+        const pieceWidth = container.clientWidth / cols;
+        const pieceHeight = container.clientHeight / rows;
 
         for(let r=0; r<rows; r++){
             for(let c=0; c<cols; c++){
@@ -79,9 +85,11 @@ function createPuzzle() {
                 piece.style.width = pieceWidth + "px";
                 piece.style.height = pieceHeight + "px";
                 piece.style.backgroundImage = `url(${imageSrc})`;
+                piece.style.backgroundSize = `${container.clientWidth}px ${container.clientHeight}px`;
                 piece.style.backgroundPosition = `-${c*pieceWidth}px -${r*pieceHeight}px`;
-                piece.style.left = Math.random()*(imgWidth-pieceWidth) + "px";
-                piece.style.top = Math.random()*(imgHeight-pieceHeight) + "px";
+                // Random container daxilində
+                piece.style.left = Math.random()*(container.clientWidth-pieceWidth) + "px";
+                piece.style.top = Math.random()*(container.clientHeight-pieceHeight) + "px";
                 piece.dataset.row = r;
                 piece.dataset.col = c;
                 container.appendChild(piece);
@@ -103,11 +111,10 @@ function startDrag(e){
     draggingPiece = e.currentTarget;
     draggingPiece.style.cursor = "grabbing";
 
-    const rect = draggingPiece.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
     const clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
     const clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
 
+    const rect = draggingPiece.getBoundingClientRect();
     offsetX = clientX - rect.left;
     offsetY = clientY - rect.top;
 }
@@ -116,12 +123,11 @@ function moveDrag(e){
     if(!draggingPiece) return;
     const clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
     const clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
-    const containerRect = container.getBoundingClientRect();
 
-    let left = clientX - containerRect.left - offsetX;
-    let top = clientY - containerRect.top - offsetY;
+    let left = clientX - container.getBoundingClientRect().left - offsetX;
+    let top = clientY - container.getBoundingClientRect().top - offsetY;
 
-    // Puzzle içindən çıxmasın
+    // Container daxilində qalsın
     left = Math.max(0, Math.min(left, container.clientWidth - draggingPiece.offsetWidth));
     top = Math.max(0, Math.min(top, container.clientHeight - draggingPiece.offsetHeight));
 
@@ -139,15 +145,15 @@ function endDrag(e){
 
 // Puzzle tamamlanma yoxlaması
 function checkPuzzle(){
-    const imgWidth = container.clientWidth / cols;
-    const imgHeight = container.clientHeight / rows;
+    const pieceWidth = container.clientWidth / cols;
+    const pieceHeight = container.clientHeight / rows;
 
     let correct = true;
     pieces.forEach(p=>{
         const left = parseFloat(p.style.left);
         const top = parseFloat(p.style.top);
-        const targetLeft = p.dataset.col * imgWidth;
-        const targetTop = p.dataset.row * imgHeight;
+        const targetLeft = p.dataset.col * pieceWidth;
+        const targetTop = p.dataset.row * pieceHeight;
         if(Math.abs(left - targetLeft) > 10 || Math.abs(top - targetTop) > 10){
             correct = false;
         }
@@ -186,10 +192,8 @@ function showMotivation(){
 
 // Event-lar
 startBtn.onclick = createPuzzle;
-
 document.addEventListener("mousemove", moveDrag);
 document.addEventListener("touchmove", moveDrag);
-
 document.addEventListener("mouseup", endDrag);
 document.addEventListener("touchend", endDrag);
 
