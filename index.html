@@ -13,9 +13,9 @@ body { font-family:sans-serif; text-align:center; background:#f0f0f0; margin:0; 
   border:2px solid #333;
   overflow:hidden;
   width:90vw;
-  max-width:600px;
-  height:90vw;
-  max-height:600px;
+  max-width:700px;
+  height:80vh;
+  max-height:700px;
 }
 .piece { position:absolute; cursor:grab; border:1px solid #ccc; touch-action:none; }
 #controls{ margin-top:20px; }
@@ -54,6 +54,7 @@ function createPuzzle() {
     const fullImage = document.getElementById("fullImage");
     fullImage.style.display = "none";
 
+    // Sıfırla
     container.innerHTML = '';
     pieces.length = 0;
 
@@ -118,7 +119,7 @@ function moveDrag(e){
     draggingPiece.style.top = top + "px";
 }
 
-function endDrag(e){
+function endDrag(){
     if(draggingPiece){
         draggingPiece.style.cursor = "grab";
         draggingPiece = null;
@@ -130,7 +131,6 @@ function endDrag(e){
 function checkPuzzle(){
     const pieceWidth = container.clientWidth / cols;
     const pieceHeight = container.clientHeight / rows;
-
     let correct = true;
     pieces.forEach(p=>{
         const left = parseFloat(p.style.left);
@@ -141,7 +141,6 @@ function checkPuzzle(){
             correct = false;
         }
     });
-
     if(correct){
         document.getElementById("bgMusic").play();
         showMotivation();
