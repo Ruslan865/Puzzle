@@ -6,29 +6,48 @@
 <title>KidsPaint Puzzle</title>
 <style>
 body { font-family:sans-serif; text-align:center; background:#f0f0f0; margin:0; padding:0; }
+
 #puzzleContainer {
   position:relative;
   display:inline-block;
   margin-top:20px;
   border:2px solid #333;
   overflow:hidden;
-  width:90vw;
-  max-width:700px;
-  height:80vh;
-  max-height:700px;
+  width:95vw;        /* mobil + PC üçün */
+  max-width:900px;   
+  height:85vh;       
+  max-height:900px;
 }
-.piece { position:absolute; cursor:grab; border:1px solid #ccc; touch-action:none; }
-#controls{ margin-top:20px; }
+
+.piece{
+  position:absolute;
+  cursor:grab;
+  border:1px solid #ccc;
+}
+
+#controls{
+  margin-top:20px;
+}
+
+#controls button {
+  padding:15px 25px;
+  font-size:18px;
+  margin:10px;
+  cursor:pointer;
+  border-radius:8px;
+}
 </style>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5792316003423969"
+crossorigin="anonymous"></script>
+
 </head>
 <body>
 
 <h1>KidsPaint Puzzle</h1>
-<p>İlk baxışda şəkil tam görünür. “Dağıt / Puzzle Başlat” düyməsinə basanda parçalanır.</p>
+<p>Şəkil tam görünsün, sonra "Dağıt / Puzzle Başlat" düyməsini basın!</p>
 
-<div id="puzzleContainer">
-  <img id="fullImage" src="whale1.jpg" style="width:100%; height:100%; object-fit:contain;">
-</div>
+<div id="puzzleContainer"></div>
 
 <div id="controls">
   <button id="startBtn">Dağıt / Puzzle Başlat</button>
@@ -40,148 +59,166 @@ body { font-family:sans-serif; text-align:center; background:#f0f0f0; margin:0; 
   <source src="baby3.mp3" type="audio/mpeg">
 </audio>
 
+<!-- ADSENSE -->
+<div style="margin-top:20px">
+<ins class="adsbygoogle"
+ style="display:block"
+ data-ad-client="ca-pub-5792316003423969"
+ data-ad-slot="1663173951"
+ data-ad-format="auto"
+ data-full-width-responsive="true"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
 <script>
+// Puzzle parametrləri
 const imageSrc = "whale1.jpg";
-const rows = 3, cols = 3;
+const rows = 3;
+const cols = 3;
 const container = document.getElementById("puzzleContainer");
 const startBtn = document.getElementById("startBtn");
-const fullImage = document.getElementById("fullImage");
-
+const music = document.getElementById("bgMusic");
 let pieces = [];
-let draggingPiece = null;
-let offsetX = 0, offsetY = 0;
 
-// Puzzle yaratma funksiyası
-function createPuzzle() {
-    // Tam görünən şəkil gizlə
-    fullImage.style.display = "none";
+// Puzzle yaratmaq
+function createPuzzle(){
+  container.innerHTML = '';
+  pieces = [];
+  const img = new Image();
+  img.src = imageSrc;
+  img.onload = () => {
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    const w = containerWidth / cols;
+    const h = containerHeight / rows;
 
-    // Container-i təmizlə
-    container.innerHTML = '';
-    pieces = [];
-
-    const img = new Image();
-    img.src = imageSrc;
-    img.onload = () => {
-        const pieceWidth = container.clientWidth / cols;
-        const pieceHeight = container.clientHeight / rows;
-
-        for(let r=0; r<rows; r++){
-            for(let c=0; c<cols; c++){
-                const piece = document.createElement("div");
-                piece.className = "piece";
-                piece.style.width = pieceWidth + "px";
-                piece.style.height = pieceHeight + "px";
-                piece.style.backgroundImage = `url(${imageSrc})`;
-                piece.style.backgroundSize = `${container.clientWidth}px ${container.clientHeight}px`;
-                piece.style.backgroundPosition = `-${c*pieceWidth}px -${r*pieceHeight}px`;
-                piece.style.left = Math.random()*(container.clientWidth-pieceWidth) + "px";
-                piece.style.top = Math.random()*(container.clientHeight-pieceHeight) + "px";
-                piece.dataset.row = r;
-                piece.dataset.col = c;
-                container.appendChild(piece);
-                pieces.push(piece);
-                makeDraggable(piece);
-            }
-        }
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const piece = document.createElement('div');
+        piece.className = 'piece';
+        piece.style.width = w + 'px';
+        piece.style.height = h + 'px';
+        piece.style.backgroundImage = `url(${imageSrc})`;
+        piece.style.backgroundSize = `${containerWidth}px ${containerHeight}px`;
+        piece.style.backgroundPosition = `-${c*w}px -${r*h}px`;
+        piece.dataset.row = r;
+        piece.dataset.col = c;
+        // ilkin təsadüfi yerləşdirmə
+        piece.style.left = Math.random() * (containerWidth - w) + 'px';
+        piece.style.top = Math.random() * (containerHeight - h) + 'px';
+        container.appendChild(piece);
+        pieces.push(piece);
+        makeDraggable(piece);
+      }
     }
+  };
 }
 
-// Drag funksiyası
-function makeDraggable(piece){
-    piece.addEventListener("mousedown", startDrag);
-    piece.addEventListener("touchstart", startDrag);
-}
+// Drag & Drop funksiyası
+function makeDraggable(el){
+  let offsetX, offsetY, dragging=false;
 
-function startDrag(e){
+  el.addEventListener('mousedown', e=>{
+    dragging=true;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+    el.style.cursor='grabbing';
+  });
+
+  document.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    const rect = container.getBoundingClientRect();
+    el.style.left = (e.clientX - rect.left - offsetX) + 'px';
+    el.style.top = (e.clientY - rect.top - offsetY) + 'px';
+  });
+
+  document.addEventListener('mouseup', ()=>{
+    if(dragging){
+      dragging=false;
+      el.style.cursor='grab';
+      checkPuzzle();
+    }
+  });
+
+  // Mobil toxunuş
+  el.addEventListener('touchstart', e=>{
+    dragging=true;
+    const touch = e.touches[0];
+    const rect = container.getBoundingClientRect();
+    offsetX = touch.clientX - rect.left - parseFloat(el.style.left);
+    offsetY = touch.clientY - rect.top - parseFloat(el.style.top);
+  });
+
+  el.addEventListener('touchmove', e=>{
+    if(!dragging) return;
+    const touch = e.touches[0];
+    const rect = container.getBoundingClientRect();
+    el.style.left = (touch.clientX - rect.left - offsetX) + 'px';
+    el.style.top = (touch.clientY - rect.top - offsetY) + 'px';
     e.preventDefault();
-    draggingPiece = e.currentTarget;
-    draggingPiece.style.cursor = "grabbing";
+  });
 
-    const clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
-
-    const rect = draggingPiece.getBoundingClientRect();
-    offsetX = clientX - rect.left;
-    offsetY = clientY - rect.top;
-}
-
-function moveDrag(e){
-    if(!draggingPiece) return;
-    const clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
-
-    let left = clientX - container.getBoundingClientRect().left - offsetX;
-    let top = clientY - container.getBoundingClientRect().top - offsetY;
-
-    left = Math.max(0, Math.min(left, container.clientWidth - draggingPiece.offsetWidth));
-    top = Math.max(0, Math.min(top, container.clientHeight - draggingPiece.offsetHeight));
-
-    draggingPiece.style.left = left + "px";
-    draggingPiece.style.top = top + "px";
-}
-
-function endDrag(){
-    if(draggingPiece){
-        draggingPiece.style.cursor = "grab";
-        draggingPiece = null;
-        checkPuzzle();
+  el.addEventListener('touchend', ()=>{
+    if(dragging){
+      dragging=false;
+      checkPuzzle();
     }
+  });
 }
 
 // Puzzle tamamlanma yoxlaması
 function checkPuzzle(){
-    const pieceWidth = container.clientWidth / cols;
-    const pieceHeight = container.clientHeight / rows;
-    let correct = true;
-    pieces.forEach(p=>{
-        const left = parseFloat(p.style.left);
-        const top = parseFloat(p.style.top);
-        const targetLeft = p.dataset.col * pieceWidth;
-        const targetTop = p.dataset.row * pieceHeight;
-        if(Math.abs(left - targetLeft) > 10 || Math.abs(top - targetTop) > 10){
-            correct = false;
-        }
-    });
-    if(correct){
-        document.getElementById("bgMusic").play();
-        showMotivation();
+  const containerWidth = container.clientWidth;
+  const containerHeight = container.clientHeight;
+  const w = containerWidth / cols;
+  const h = containerHeight / rows;
+  let correct = true;
+
+  pieces.forEach(p=>{
+    const left = parseFloat(p.style.left);
+    const top = parseFloat(p.style.top);
+    const targetLeft = p.dataset.col * w;
+    const targetTop = p.dataset.row * h;
+    if(Math.abs(left - targetLeft) > 15 || Math.abs(top - targetTop) > 15){
+      correct = false;
     }
+  });
+
+  if(correct){
+    music.play();
+    showMotivation();
+    // Puzzle tamamlandı, dərhal ulduzlar göstərilsin
+  }
 }
 
 // Motivasiya effekti
 function showMotivation(){
-    for(let i=0;i<20;i++){
-        const star = document.createElement("div");
-        star.textContent = "⭐";
-        star.style.position = "absolute";
-        star.style.left = Math.random()*container.clientWidth + "px";
-        star.style.top = "-30px";
-        star.style.fontSize = (20 + Math.random()*20) + "px";
-        star.style.opacity = 0.8;
-        container.appendChild(star);
+  for(let i=0;i<20;i++){
+    const star = document.createElement('div');
+    star.textContent='⭐';
+    star.style.position='absolute';
+    star.style.left = Math.random()*container.clientWidth+'px';
+    star.style.top = '-30px';
+    star.style.fontSize = (20+Math.random()*20)+'px';
+    star.style.opacity = 0.8;
+    container.appendChild(star);
 
-        star.animate([
-            { transform: "translateY(0px)", opacity:1 },
-            { transform: "translateY(200px)", opacity:0 }
-        ], {
-            duration: 2000 + Math.random()*1000,
-            easing: "ease-out"
-        });
+    star.animate([
+      { transform: 'translateY(0px)', opacity: 1 },
+      { transform: 'translateY(200px)', opacity: 0 }
+    ], {
+      duration: 2000 + Math.random()*1000,
+      easing: 'ease-out'
+    });
 
-        setTimeout(()=>container.removeChild(star),3000);
-    }
+    setTimeout(()=>container.removeChild(star), 3000);
+  }
 }
 
-// Event-lar
 startBtn.onclick = createPuzzle;
-document.addEventListener("mousemove", moveDrag);
-document.addEventListener("touchmove", moveDrag);
-document.addEventListener("mouseup", endDrag);
-document.addEventListener("touchend", endDrag);
+document.getElementById('playMusic').onclick = ()=>{ music.play(); }
+document.getElementById('pauseMusic').onclick = ()=>{ music.pause(); }
 
-document.getElementById("playMusic").onclick = () => { document.getElementById("bgMusic").play(); };
-document.getElementById("pauseMusic").onclick = () => { document.getElementById("bgMusic").pause(); };
 </script>
 
 </body>
