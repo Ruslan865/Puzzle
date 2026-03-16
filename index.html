@@ -13,9 +13,9 @@ body { font-family:sans-serif; text-align:center; background:#f0f0f0; margin:0; 
   margin-top:20px;
   border:2px solid #333;
   overflow:hidden;
-  width:95vw;        /* mobil + PC üçün */
-  max-width:900px;   
-  height:85vh;       
+  width:95vw;
+  max-width:900px;
+  height:85vh;
   max-height:900px;
 }
 
@@ -37,17 +37,15 @@ body { font-family:sans-serif; text-align:center; background:#f0f0f0; margin:0; 
   border-radius:8px;
 }
 </style>
-
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5792316003423969"
-crossorigin="anonymous"></script>
-
 </head>
 <body>
 
 <h1>KidsPaint Puzzle</h1>
-<p>Şəkil tam görünsün, sonra "Dağıt / Puzzle Başlat" düyməsini basın!</p>
+<p>İlkin şəkil görünür, sonra "Dağıt / Puzzle Başlat" düyməsini basın!</p>
 
-<div id="puzzleContainer"></div>
+<div id="puzzleContainer">
+  <img id="fullImage" src="whale1.jpg" style="width:100%; height:100%; object-fit:contain; display:block;">
+</div>
 
 <div id="controls">
   <button id="startBtn">Dağıt / Puzzle Başlat</button>
@@ -59,29 +57,20 @@ crossorigin="anonymous"></script>
   <source src="baby3.mp3" type="audio/mpeg">
 </audio>
 
-<!-- ADSENSE -->
-<div style="margin-top:20px">
-<ins class="adsbygoogle"
- style="display:block"
- data-ad-client="ca-pub-5792316003423969"
- data-ad-slot="1663173951"
- data-ad-format="auto"
- data-full-width-responsive="true"></ins>
-<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-</div>
-
 <script>
-// Puzzle parametrləri
 const imageSrc = "whale1.jpg";
 const rows = 3;
 const cols = 3;
 const container = document.getElementById("puzzleContainer");
 const startBtn = document.getElementById("startBtn");
 const music = document.getElementById("bgMusic");
+const fullImage = document.getElementById("fullImage");
 let pieces = [];
 
-// Puzzle yaratmaq
 function createPuzzle(){
+  // Tam şəkil gizlə
+  fullImage.style.display = "none";
+
   container.innerHTML = '';
   pieces = [];
   const img = new Image();
@@ -103,7 +92,6 @@ function createPuzzle(){
         piece.style.backgroundPosition = `-${c*w}px -${r*h}px`;
         piece.dataset.row = r;
         piece.dataset.col = c;
-        // ilkin təsadüfi yerləşdirmə
         piece.style.left = Math.random() * (containerWidth - w) + 'px';
         piece.style.top = Math.random() * (containerHeight - h) + 'px';
         container.appendChild(piece);
@@ -166,7 +154,6 @@ function makeDraggable(el){
   });
 }
 
-// Puzzle tamamlanma yoxlaması
 function checkPuzzle(){
   const containerWidth = container.clientWidth;
   const containerHeight = container.clientHeight;
@@ -187,11 +174,9 @@ function checkPuzzle(){
   if(correct){
     music.play();
     showMotivation();
-    // Puzzle tamamlandı, dərhal ulduzlar göstərilsin
   }
 }
 
-// Motivasiya effekti
 function showMotivation(){
   for(let i=0;i<20;i++){
     const star = document.createElement('div');
@@ -218,7 +203,6 @@ function showMotivation(){
 startBtn.onclick = createPuzzle;
 document.getElementById('playMusic').onclick = ()=>{ music.play(); }
 document.getElementById('pauseMusic').onclick = ()=>{ music.pause(); }
-
 </script>
 
 </body>
