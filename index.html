@@ -45,18 +45,20 @@ const imageSrc = "whale1.jpg";
 const rows = 3, cols = 3;
 const container = document.getElementById("puzzleContainer");
 const startBtn = document.getElementById("startBtn");
-const pieces = [];
+const fullImage = document.getElementById("fullImage");
+
+let pieces = [];
 let draggingPiece = null;
 let offsetX = 0, offsetY = 0;
 
 // Puzzle yaratma funksiyası
 function createPuzzle() {
-    const fullImage = document.getElementById("fullImage");
+    // Tam görünən şəkil gizlə
     fullImage.style.display = "none";
 
-    // Sıfırla
+    // Container-i təmizlə
     container.innerHTML = '';
-    pieces.length = 0;
+    pieces = [];
 
     const img = new Image();
     img.src = imageSrc;
@@ -85,7 +87,7 @@ function createPuzzle() {
     }
 }
 
-// Drag funksiyası (mouse + touch)
+// Drag funksiyası
 function makeDraggable(piece){
     piece.addEventListener("mousedown", startDrag);
     piece.addEventListener("touchstart", startDrag);
@@ -144,17 +146,6 @@ function checkPuzzle(){
     if(correct){
         document.getElementById("bgMusic").play();
         showMotivation();
-        const msg = document.createElement("div");
-        msg.textContent = "Təbrik! Puzzle tamamlandı!";
-        msg.style.position = "absolute";
-        msg.style.top = "40%";
-        msg.style.left = "50%";
-        msg.style.transform = "translate(-50%, -50%)";
-        msg.style.fontSize = "2em";
-        msg.style.color = "gold";
-        msg.style.fontWeight = "bold";
-        container.appendChild(msg);
-        setTimeout(()=>container.removeChild(msg), 5000);
     }
 }
 
