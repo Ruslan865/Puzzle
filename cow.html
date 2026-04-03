@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kids_Paint Puzzle</title>
+<style>
+body { font-family:sans-serif; text-align:center; background:#f0f0f0; margin:0; padding:0; }
+
+#puzzleContainer {
+  position:relative;
+  display:inline-block;
+  margin-top:20px;
+  border:2px solid #333;
+  overflow:hidden;
+  width:95vw;
+  max-width:900px;
+  height:85vh;
+  max-height:900px;
+}
+
+.piece{
+  position:absolute;
+  cursor:grab;
+  border:1px solid #ccc;
+}
+
+#controls{
+  margin-top:20px;
+}
+
+#controls button {
+  padding:15px 25px;
+  font-size:18px;
+  margin:10px;
+  cursor:pointer;
+  border-radius:8px;
+}
+</style>
+</head>
+<body>
+
+<h1>Kids_Paint Puzzle</h1>
+<p>İlkin şəkil görünür, sonra "Dağıt / Puzzle Başlat" düyməsini basın!</p>
+
+<div id="puzzleContainer">
+  <img id="fullImage" src="cow.jpg" style="width:100%; height:100%; object-fit:contain; display:block;">
+</div>
+
+<div id="controls">
+  <button id="startBtn">Dağıt / Puzzle Başlat</button>
+  <button id="playMusic">Musiqi Çal</button>
+  <button id="pauseMusic">Musiqi Dayandır</button>
+</div>
+
+  <div style="margin-top:30px; text-align:center;">
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5792316003423969"
+crossorigin="anonymous"></script>
+
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-5792316003423969"
+     data-ad-slot="1663173951"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+</div>
+  
+<audio id="bgMusic" loop>
+  <source src="baby3.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const imageSrc = "cow.jpg";
+const rows = 3;
+const cols = 3;
+const container = document.getElementById("puzzleContainer");
+const startBtn = document.getElementById("startBtn");
+const music = document.getElementById("bgMusic");
+const fullImage = document.getElementById("fullImage");
+let pieces = [];
+
+function createPuzzle(){
+  // Tam şəkil gizlə
+  fullImage.style.display = "none";
+
+  container.innerHTML = '';
+  pieces = [];
+  const img = new Image();
+  img.src = imageSrc;
+  img.onload = () => {
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    const w = containerWidth / cols;
+    const h = containerHeight / rows;
+
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const piece = document.createElement('div');
+        piece.className = 'piece';
+        piece.style.width = w + 'px';
+        piece.style.height = h + 'px';
+        piece.style.backgroundImage = `url(${imageSrc})`;
+        piece.style.backgroundSize = `${containerWidth}px ${containerHeight}px`;
+        piece.style.backgroundPosition = `-${c*w}px -${r*h}px`;
+        piece.dataset.row = r;
+        piece.dataset.col = c;
+        piece.style.left = Math.random() * (containerWidth - w) + 'px';
+        piece.style.top = Math.random() * (containerHeight - h) + 'px';
+        container.appendChild(piece);
+        pieces.push(piece);
+        makeDraggable(piece);
+      }
+    }
+  };
+}
+
+// Drag & Drop funksiyası
+function makeDraggable(el){
+  let offsetX, offsetY, dragging=false;
+
+  el.addEventListener('mousedown', e=>{
+    dragging=true;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+    el.style.cursor='grabbing';
+  });
+
+  document.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    const rect = container.getBoundingClientRect();
+    el.style.left = (e.clientX - rect.left - offsetX) + 'px';
+    el.style.top = (e.clientY - rect.top - offsetY) + 'px';
+  });
+
+  document.addEventListener('mouseup', ()=>{
+    if(dragging){
+      dragging=false;
+      el.style.cursor='grab';
+      checkPuzzle();
+    }
+  });
+
+  // Mobil toxunuş
+  el.addEventListener('touchstart', e=>{
+    dragging=true;
+    const touch = e.touches[0];
+    const rect = container.getBoundingClientRect();
+    offsetX = touch.clientX - rect.left - parseFloat(el.style.left);
+    offsetY = touch.clientY - rect.top - parseFloat(el.style.top);
+  });
+
+  el.addEventListener('touchmove', e=>{
+    if(!dragging) return;
+    const touch = e.touches[0];
+    const rect = container.getBoundingClientRect();
+    el.style.left = (touch.clientX - rect.left - offsetX) + 'px';
+    el.style.top = (touch.clientY - rect.top - offsetY) + 'px';
+    e.preventDefault();
+  });
+
+  el.addEventListener('touchend', ()=>{
+    if(dragging){
+      dragging=false;
+      checkPuzzle();
+    }
+  });
+}
+
+function checkPuzzle(){
+  const containerWidth = container.clientWidth;
+  const containerHeight = container.clientHeight;
+  const w = containerWidth / cols;
+  const h = containerHeight / rows;
+  let correct = true;
+
+  pieces.forEach(p=>{
+    const left = parseFloat(p.style.left);
+    const top = parseFloat(p.style.top);
+    const targetLeft = p.dataset.col * w;
+    const targetTop = p.dataset.row * h;
+    if(Math.abs(left - targetLeft) > 15 || Math.abs(top - targetTop) > 15){
+      correct = false;
+    }
+  });
+
+  if(correct){
+    music.play();
+    showMotivation();
+  }
+}
+
+function showMotivation(){
+  for(let i=0;i<20;i++){
+    const star = document.createElement('div');
+    star.textContent='⭐';
+    star.style.position='absolute';
+    star.style.left = Math.random()*container.clientWidth+'px';
+    star.style.top = '-30px';
+    star.style.fontSize = (20+Math.random()*20)+'px';
+    star.style.opacity = 0.8;
+    container.appendChild(star);
+
+    star.animate([
+      { transform: 'translateY(0px)', opacity: 1 },
+      { transform: 'translateY(200px)', opacity: 0 }
+    ], {
+      duration: 2000 + Math.random()*1000,
+      easing: 'ease-out'
+    });
+
+    setTimeout(()=>container.removeChild(star), 3000);
+  }
+}
+
+startBtn.onclick = createPuzzle;
+document.getElementById('playMusic').onclick = ()=>{ music.play(); }
+document.getElementById('pauseMusic').onclick = ()=>{ music.pause(); }
+</script>
+
+</body>
+</html>
